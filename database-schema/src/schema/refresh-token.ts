@@ -1,16 +1,16 @@
 import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { users } from "./users";
+import { user } from "./user";
 
-export const refreshTokens = pgTable("refresh_tokens", {
+export const refreshToken = pgTable("refresh_token", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id")
 		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
+		.references(() => user.id, { onDelete: "cascade" }),
 	tokenHash: varchar("token_hash", { length: 255 }).notNull().unique(),
 	expiresAt: timestamp("expires_at").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	revokedAt: timestamp("revoked_at"),
 });
 
-export type RefreshToken = typeof refreshTokens.$inferSelect;
-export type NewRefreshToken = typeof refreshTokens.$inferInsert;
+export type RefreshToken = typeof refreshToken.$inferSelect;
+export type NewRefreshToken = typeof refreshToken.$inferInsert;
