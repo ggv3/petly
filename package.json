@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/ggv3/petly.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "ggv3",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
