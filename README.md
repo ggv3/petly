@@ -1,17 +1,20 @@
 # Petly
 
-A web app for renting pets
-
-## User stories
-
-- As a user I want to see the application
-- As user I want to log in the application so that I can use the application
-- As a user I want to add a pet so that it can be rented
-- As a user I want to modify the pets information so that they are up to date
-- As a user I want to update my information so that they are up to date
-- As a user I want to rent a pet so that I can enjoy their company
+A web app for renting pets built with a microservices architecture.
 
 ## Architecture
+
+The application uses a microservices architecture with the following services:
+
+- **Frontend**: React, TypeScript, Vite, Vitest, MUI, Tailwind, React Query
+- **API Gateway**: TypeScript, Fastify, Vitest
+- **Auth Service**: TypeScript, Fastify, JWT, Drizzle ORM
+- **User Service**: TypeScript, Fastify, Drizzle ORM
+- **Pet Service**: TypeScript, Fastify, Drizzle ORM
+- **Rental Service**: TypeScript, Fastify, Drizzle ORM
+- **Database**: PostgreSQL with Drizzle schema
+
+### Service Architecture
 
 ```mermaid
 flowchart LR
@@ -37,12 +40,9 @@ flowchart LR
  database <--> database-schema
 ```
 
----
+### Application Flow
 
 ```mermaid
----
-title: Application flow
----
 flowchart LR
  home
  login
@@ -67,27 +67,85 @@ own-pet-details <--> home
 
 ```
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js 24+
+- Docker and Docker Compose
+- PostgreSQL (via Docker)
+
+### Database Setup
+
+1. Create environment files for database configuration:
+
+**`.env.dev`** (for development):
+
+```env
+POSTGRES_DB=petly_dev
+POSTGRES_USER=petly_dev
+POSTGRES_PASSWORD=petly_dev
+```
+
+**`.env.prod`** (for production):
+
+```env
+POSTGRES_DB=petly_prod
+POSTGRES_USER=petly_prod
+POSTGRES_PASSWORD=your_secure_password
+```
+
+2. Start the database:
+
+```bash
+# Development
+docker-compose --env-file .env.dev up -d
+
+# Production
+docker-compose --env-file .env.prod up -d
+```
+
+### Installation
+
+```bash
+# Install dependencies for all services
+npm install
+
+# Run database migrations
+npm run migrate
+
+# Start development servers
+npm run dev
+```
+
+## Project Structure
+
+```
 petly/
+├── docker-compose.yaml         # Container orchestration
+├── frontend/                   # React application
+├── api-gateway/                # API Gateway service
+├── auth-service/               # Authentication service
+├── user-service/               # User management service
+├── pet-service/                # Pet management service
+├── rental-service/             # Rental management service
+└── database-schema/            # Drizzle database schema
+```
 
-docker-compose.yaml (container stuff)
+## User Stories
 
-frontend/ (React, typescript, vite, vitest, mui, tailwind react-query, react contexts)
+- As a user I want to see the application
+- As a user I want to log in so that I can use the application
+- As a user I want to add a pet so that it can be rented
+- As a user I want to modify pet information so that it stays up to date
+- As a user I want to update my information so that it stays current
+- As a user I want to rent a pet so that I can enjoy their company
 
-api-gateway/ (typescript, Fastify, vitest)
+## Open Questions & TODOs
 
-auth-service/ (typescript, Fastify, vitest, JWT, Drizzle)
-
-user-service/ (typescript, fastify, vitest, Drizzle)
-
-pet-service/ (typescript, fastify, vitest, Drizzle)
-
-rental-service/ (typescript, fastify, vitest, Drizzle)
-
-database-schema/ (Drizzle)
-
-## Issues
-
-- multiple folders with package.json files, how to handle dependency updates (dependabot? automate pull requests)
-- same dependencies on many folders, can I somehow combine them?
-- how to handle CI
-- how to expose the app in the internet
+- How to handle dependency updates across multiple package.json files (Dependabot? Automated PRs?)
+- Can shared dependencies be consolidated across services?
+- CI/CD pipeline setup and strategy
+- Production deployment and internet exposure strategy
+- Monitoring and logging strategy
+- API documentation (Swagger/OpenAPI?)
