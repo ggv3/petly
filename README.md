@@ -77,9 +77,13 @@ own-pet-details <--> home
 
 ### Database Setup
 
-1. Create environment files for database configuration:
+The project uses PostgreSQL with Drizzle ORM for schema management and migrations. The `database-schema` service handles all database schema definitions and migrations.
 
-**`.env.dev`** (for development):
+#### 1. Create Environment Files
+
+Create environment files for database configuration:
+
+**`.env.dev`**
 
 ```env
 POSTGRES_DB=petly_dev
@@ -87,7 +91,7 @@ POSTGRES_USER=petly_dev
 POSTGRES_PASSWORD=petly_dev
 ```
 
-**`.env.prod`** (for production):
+**`.env.prod`**
 
 ```env
 POSTGRES_DB=petly_prod
@@ -95,41 +99,97 @@ POSTGRES_USER=petly_prod
 POSTGRES_PASSWORD=your_secure_password
 ```
 
-2. Start the database:
+#### 2. Start Database and Run Migrations
+
+The docker-compose setup will automatically start PostgreSQL and run migrations:
 
 ```bash
 # Development
-docker-compose --env-file .env.dev up -d
+npm run dev
 
 # Production
-docker-compose --env-file .env.prod up -d
+npm run prod
 ```
+
+The `database-schema` service will wait for PostgreSQL to be healthy before applying migrations.
+
+#### 3. Database Management Commands
+
+```bash
+# Generate new migration after schema changes
+npm run generate
+
+# Apply migrations manually
+npm run migrate
+
+# Open Drizzle Studio (database GUI)
+npm run studio
+```
+
+### Database Schema
+
+Current schema includes authentication tables:
+
+- **users**: User accounts with username and password
+- **refresh_tokens**: JWT refresh tokens for authentication
+
+Schema definitions are located in `database-schema/src/schema/`.
 
 ### Installation
 
 ```bash
-# Install dependencies for all services
+# Install all dependencies
 npm install
 
-# Run database migrations
-npm run migrate
-
-# Start development servers
+# Start development environment
 npm run dev
 ```
+
+### Development Workflow
+
+1. **Start the database and run migrations**:
+   ```bash
+   npm run dev
+   ```
+
+2. **Make schema changes** in `database-schema/src/schema/`
+
+3. **Generate migration**:
+   ```bash
+   npm run generate
+   ```
+
+4. **Apply migration**:
+   ```bash
+   npm run migrate
+   ```
+
+5. **Inspect database**:
+   ```bash
+   npm run studio
+   ```
 
 ## Project Structure
 
 ```
 petly/
 ├── docker-compose.yaml         # Container orchestration
+├── .env.dev                    # Development database config
+├── .env.prod                   # Production database config
+│
+├── database-schema/            # Drizzle ORM schema & migrations
+│   ├── src/
+│   │   └── schema/             # Database table definitions
+│   ├── migrations/             # Generated SQL migrations
+│   ├── drizzle.config.ts       # Drizzle configuration
+│   └── Dockerfile              # Migration service container
+│
 ├── frontend/                   # React application
 ├── api-gateway/                # API Gateway service
 ├── auth-service/               # Authentication service
 ├── user-service/               # User management service
 ├── pet-service/                # Pet management service
-├── rental-service/             # Rental management service
-└── database-schema/            # Drizzle database schema
+└── rental-service/             # Rental management service
 ```
 
 ## User Stories

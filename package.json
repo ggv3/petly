@@ -12,15 +12,20 @@
 	},
 	"license": "MIT",
 	"author": "ggv3",
+	"workspaces": [
+		"database-schema"
+	],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"prepare": "husky",
 		"lint": "biome lint .",
 		"format": "biome format .",
 		"ci": "biome ci .",
-		"db:dev": "docker-compose --env-file .env.dev up",
-		"db:prod": "docker-compose --env-file .env.prod up -d",
-		"db:down": "docker-compose down"
+		"dev": "docker-compose --env-file .env.dev up --build",
+		"prod": "docker-compose --env-file .env.prod up -d",
+		"generate": "cd database-schema && npm run generate",
+		"migrate": "cd database-schema && npm run migrate",
+		"studio": "cd database-schema && npm run studio"
 	},
 	"type": "module",
 	"devDependencies": {
