@@ -1,2 +1,2 @@
-export * from "./refresh-tokens";
-export * from "./users";
+export * from "./refresh-token";
+export * from "./user";
