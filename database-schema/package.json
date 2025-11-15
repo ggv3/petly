@@ -1,0 +1,20 @@
+{
+	"name": "@petly/database-schema",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./src/index.ts",
+	"scripts": {
+		"generate": "drizzle-kit generate",
+		"migrate": "drizzle-kit migrate",
+		"studio": "drizzle-kit studio"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.44.7",
+		"postgres": "^3.4.5"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.1",
+		"drizzle-kit": "^0.31.7",
+		"typescript": "^5.7.2"
+	}
+}
