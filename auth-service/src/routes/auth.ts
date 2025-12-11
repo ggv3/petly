@@ -1,6 +1,6 @@
-import type { FastifyInstance } from "fastify";
-import { z } from "zod";
-import * as authService from "../services/auth-service.js";
+import type { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import * as authService from '../services/auth-service.js';
 
 const registerSchema = z.object({
   username: z.string().min(3).max(50),
@@ -16,14 +16,14 @@ const refreshSchema = z.object({
   refreshToken: z.string(),
 });
 
-export const authRoutes = async (server: FastifyInstance) => {
+export const authRoutes = (server: FastifyInstance) => {
   server.post(
-    "/auth/register",
+    '/auth/register',
     {
       config: {
         rateLimit: {
           max: 10, // Maximum 10 requests
-          timeWindow: "1 minute", // Per minute
+          timeWindow: '1 minute', // Per minute
         },
       },
     },
@@ -36,18 +36,18 @@ export const authRoutes = async (server: FastifyInstance) => {
         if (error instanceof Error) {
           return reply.code(400).send({ error: error.message });
         }
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: 'Internal server error' });
       }
     },
   );
 
   server.post(
-    "/auth/login",
+    '/auth/login',
     {
       config: {
         rateLimit: {
           max: 5, // Maximum 5 requests
-          timeWindow: "1 minute", // Per minute
+          timeWindow: '1 minute', // Per minute
         },
       },
     },
@@ -60,18 +60,18 @@ export const authRoutes = async (server: FastifyInstance) => {
         if (error instanceof Error) {
           return reply.code(401).send({ error: error.message });
         }
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: 'Internal server error' });
       }
     },
   );
 
   server.post(
-    "/auth/refresh",
+    '/auth/refresh',
     {
       config: {
         rateLimit: {
           max: 20, // Maximum 20 requests
-          timeWindow: "1 minute", // Per minute
+          timeWindow: '1 minute', // Per minute
         },
       },
     },
@@ -84,18 +84,18 @@ export const authRoutes = async (server: FastifyInstance) => {
         if (error instanceof Error) {
           return reply.code(401).send({ error: error.message });
         }
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: 'Internal server error' });
       }
     },
   );
 
   server.post(
-    "/auth/logout",
+    '/auth/logout',
     {
       config: {
         rateLimit: {
           max: 10, // Maximum 10 requests
-          timeWindow: "1 minute", // Per minute
+          timeWindow: '1 minute', // Per minute
         },
       },
     },
@@ -108,7 +108,7 @@ export const authRoutes = async (server: FastifyInstance) => {
         if (error instanceof Error) {
           return reply.code(400).send({ error: error.message });
         }
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: 'Internal server error' });
       }
     },
   );

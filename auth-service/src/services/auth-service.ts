@@ -1,13 +1,9 @@
-import crypto from "node:crypto";
-import { refreshToken, user } from "@petly/database-schema";
-import { eq } from "drizzle-orm";
-import { db } from "../config/database.js";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} from "../utils/jwt.js";
-import { hashPassword, verifyPassword } from "../utils/password.js";
+import crypto from 'node:crypto';
+import { refreshToken, user } from '@petly/database-schema';
+import { eq } from 'drizzle-orm';
+import { db } from '../config/database.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
+import { hashPassword, verifyPassword } from '../utils/password.js';
 
 export interface RegisterInput {
   username: string;
@@ -31,7 +27,7 @@ export const register = async (input: RegisterInput): Promise<AuthTokens> => {
   });
 
   if (existingUser) {
-    throw new Error("Username already exists");
+    throw new Error('Username already exists');
   }
 
   // Hash password and create user
@@ -55,13 +51,13 @@ export const login = async (input: LoginInput): Promise<AuthTokens> => {
   });
 
   if (!foundUser) {
-    throw new Error("Invalid credentials");
+    throw new Error('Invalid credentials');
   }
 
   // Verify password
   const isValid = await verifyPassword(input.password, foundUser.passwordHash);
   if (!isValid) {
-    throw new Error("Invalid credentials");
+    throw new Error('Invalid credentials');
   }
 
   // Generate tokens
@@ -78,12 +74,12 @@ export const refresh = async (token: string): Promise<AuthTokens> => {
   });
 
   if (!storedToken || storedToken.revokedAt !== null) {
-    throw new Error("Invalid refresh token");
+    throw new Error('Invalid refresh token');
   }
 
   // Check if token is expired
   if (new Date() > storedToken.expiresAt) {
-    throw new Error("Refresh token expired");
+    throw new Error('Refresh token expired');
   }
 
   // Get user
@@ -92,7 +88,7 @@ export const refresh = async (token: string): Promise<AuthTokens> => {
   });
 
   if (!foundUser) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // Generate new tokens
@@ -110,15 +106,12 @@ export const logout = async (token: string): Promise<void> => {
     .where(eq(refreshToken.id, payload.tokenId));
 };
 
-const generateTokensForUser = async (
-  userId: string,
-  username: string,
-): Promise<AuthTokens> => {
+const generateTokensForUser = async (userId: string, username: string): Promise<AuthTokens> => {
   // Generate access token
   const accessToken = generateAccessToken({ userId, username });
 
   // Create refresh token in database
-  const tokenHash = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
