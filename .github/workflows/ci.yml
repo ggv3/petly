@@ -48,5 +48,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Run auth-service tests
-        run: cd auth-service && npm test -- --run
+      - name: Run tests
+        run: npm run test:run
