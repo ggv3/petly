@@ -32,5 +32,29 @@ services:
       postgres:
         condition: service_healthy
 
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      PORT: 3001
+      HOST: 0.0.0.0
+      DB_HOST: postgres
+      DB_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./auth-service/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      database-schema:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   postgres_data:

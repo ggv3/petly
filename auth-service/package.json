@@ -1,0 +1,23 @@
+{
+	"name": "@petly/auth-service",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"test": "vitest",
+		"ci": "biome ci ."
+	},
+	"dependencies": {
+		"fastify": "^5.6.2",
+		"drizzle-orm": "^0.44.7",
+		"postgres": "^3.4.7",
+		"jsonwebtoken": "^9.0.3"
+	},
+	"devDependencies": {
+		"@types/jsonwebtoken": "^9.0.10",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	}
+}
