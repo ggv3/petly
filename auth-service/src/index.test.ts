@@ -6,7 +6,7 @@ describe("Auth Service", () => {
 	let server: FastifyInstance;
 
 	beforeAll(async () => {
-		server = buildServer();
+		server = buildServer({ logger: false });
 		await server.ready();
 	});
 
