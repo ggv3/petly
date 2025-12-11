@@ -10,11 +10,11 @@
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.45.0",
-		"postgres": "^3.4.5"
+		"postgres": "^3.4.7"
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.1",
 		"drizzle-kit": "^0.31.8",
-		"typescript": "^5.7.2"
+		"typescript": "^5.9.3"
 	}
 }
