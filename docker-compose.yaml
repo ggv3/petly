@@ -34,8 +34,8 @@ services:
 
   auth-service:
     build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./auth-service/Dockerfile
     container_name: auth-service
     environment:
       PORT: 3001
@@ -45,10 +45,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
     ports:
       - "3001:3001"
     volumes:
-      - ./auth-service/src:/app/src
+      - ./auth-service/src:/app/auth-service/src
+      - ./database-schema/src:/app/database-schema/src
     depends_on:
       postgres:
         condition: service_healthy

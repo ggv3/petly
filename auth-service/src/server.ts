@@ -1,15 +1,16 @@
 import type { FastifyInstance } from "fastify";
 import Fastify from "fastify";
+import { authRoutes } from "./routes/auth.js";
+import { healthRoutes } from "./routes/health.js";
 
 export const buildServer = (): FastifyInstance => {
 	const server: FastifyInstance = Fastify({
 		logger: true,
 	});
 
-	// Health check endpoint
-	server.get("/health", async () => {
-		return { status: "ok", service: "auth-service" };
-	});
+	// Register routes
+	server.register(healthRoutes);
+	server.register(authRoutes);
 
 	return server;
 };
