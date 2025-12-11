@@ -477,4 +477,97 @@ describe("Auth Routes - Rate Limiting", () => {
 
     expect(rateLimitedResponse.statusCode).toBe(429);
   });
+
+  it("should enforce rate limiting on /auth/register after 10 requests", async () => {
+    const mockTokens = {
+      accessToken: "mock.access.token",
+      refreshToken: "mock.refresh.token",
+    };
+
+    vi.mocked(authService.register).mockResolvedValue(mockTokens);
+
+    // Make 10 successful requests
+    for (let i = 0; i < 10; i++) {
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/register",
+        payload: {
+          username: `testuser${i}`,
+          password: "password123",
+        },
+      });
+      expect(response.statusCode).toBe(201);
+    }
+
+    // 11th request should be rate limited
+    const rateLimitedResponse = await server.inject({
+      method: "POST",
+      url: "/auth/register",
+      payload: {
+        username: "testuser11",
+        password: "password123",
+      },
+    });
+
+    expect(rateLimitedResponse.statusCode).toBe(429);
+  });
+
+  it("should enforce rate limiting on /auth/refresh after 20 requests", async () => {
+    const mockTokens = {
+      accessToken: "new.access.token",
+      refreshToken: "new.refresh.token",
+    };
+
+    vi.mocked(authService.refresh).mockResolvedValue(mockTokens);
+
+    // Make 20 successful requests
+    for (let i = 0; i < 20; i++) {
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/refresh",
+        payload: {
+          refreshToken: "valid.refresh.token",
+        },
+      });
+      expect(response.statusCode).toBe(200);
+    }
+
+    // 21st request should be rate limited
+    const rateLimitedResponse = await server.inject({
+      method: "POST",
+      url: "/auth/refresh",
+      payload: {
+        refreshToken: "valid.refresh.token",
+      },
+    });
+
+    expect(rateLimitedResponse.statusCode).toBe(429);
+  });
+
+  it("should enforce rate limiting on /auth/logout after 10 requests", async () => {
+    vi.mocked(authService.logout).mockResolvedValue();
+
+    // Make 10 successful requests
+    for (let i = 0; i < 10; i++) {
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/logout",
+        payload: {
+          refreshToken: "valid.refresh.token",
+        },
+      });
+      expect(response.statusCode).toBe(204);
+    }
+
+    // 11th request should be rate limited
+    const rateLimitedResponse = await server.inject({
+      method: "POST",
+      url: "/auth/logout",
+      payload: {
+        refreshToken: "valid.refresh.token",
+      },
+    });
+
+    expect(rateLimitedResponse.statusCode).toBe(429);
+  });
 });
