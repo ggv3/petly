@@ -17,18 +17,29 @@ const refreshSchema = z.object({
 });
 
 export const authRoutes = async (server: FastifyInstance) => {
-  server.post("/auth/register", async (request, reply) => {
-    try {
-      const body = registerSchema.parse(request.body);
-      const tokens = await authService.register(body);
-      return reply.code(201).send(tokens);
-    } catch (error) {
-      if (error instanceof Error) {
-        return reply.code(400).send({ error: error.message });
+  server.post(
+    "/auth/register",
+    {
+      config: {
+        rateLimit: {
+          max: 10, // Maximum 10 requests
+          timeWindow: "1 minute", // Per minute
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = registerSchema.parse(request.body);
+        const tokens = await authService.register(body);
+        return reply.code(201).send(tokens);
+      } catch (error) {
+        if (error instanceof Error) {
+          return reply.code(400).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: "Internal server error" });
       }
-      return reply.code(500).send({ error: "Internal server error" });
-    }
-  });
+    },
+  );
 
   server.post(
     "/auth/login",
@@ -54,29 +65,51 @@ export const authRoutes = async (server: FastifyInstance) => {
     },
   );
 
-  server.post("/auth/refresh", async (request, reply) => {
-    try {
-      const body = refreshSchema.parse(request.body);
-      const tokens = await authService.refresh(body.refreshToken);
-      return reply.send(tokens);
-    } catch (error) {
-      if (error instanceof Error) {
-        return reply.code(401).send({ error: error.message });
+  server.post(
+    "/auth/refresh",
+    {
+      config: {
+        rateLimit: {
+          max: 20, // Maximum 20 requests
+          timeWindow: "1 minute", // Per minute
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = refreshSchema.parse(request.body);
+        const tokens = await authService.refresh(body.refreshToken);
+        return reply.send(tokens);
+      } catch (error) {
+        if (error instanceof Error) {
+          return reply.code(401).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: "Internal server error" });
       }
-      return reply.code(500).send({ error: "Internal server error" });
-    }
-  });
+    },
+  );
 
-  server.post("/auth/logout", async (request, reply) => {
-    try {
-      const body = refreshSchema.parse(request.body);
-      await authService.logout(body.refreshToken);
-      return reply.code(204).send();
-    } catch (error) {
-      if (error instanceof Error) {
-        return reply.code(400).send({ error: error.message });
+  server.post(
+    "/auth/logout",
+    {
+      config: {
+        rateLimit: {
+          max: 10, // Maximum 10 requests
+          timeWindow: "1 minute", // Per minute
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = refreshSchema.parse(request.body);
+        await authService.logout(body.refreshToken);
+        return reply.code(204).send();
+      } catch (error) {
+        if (error instanceof Error) {
+          return reply.code(400).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: "Internal server error" });
       }
-      return reply.code(500).send({ error: "Internal server error" });
-    }
-  });
+    },
+  );
 };
