@@ -1,25 +1,17 @@
-import type { FastifyInstance } from "fastify";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { buildServer } from "../server.js";
-import * as authService from "../services/auth-service.js";
+import type { FastifyInstance } from 'fastify';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildServer } from '../server.js';
+import * as authService from '../services/auth-service.js';
 
 // Mock the auth service module
-vi.mock("../services/auth-service.js", () => ({
+vi.mock('../services/auth-service.js', () => ({
   register: vi.fn(),
   login: vi.fn(),
   refresh: vi.fn(),
   logout: vi.fn(),
 }));
 
-describe("Auth Routes", () => {
+describe('Auth Routes', () => {
   let server: FastifyInstance;
 
   beforeAll(async () => {
@@ -35,400 +27,390 @@ describe("Auth Routes", () => {
     await server.close();
   });
 
-  describe("POST /auth/register", () => {
-    it("should register a new user successfully", async () => {
+  describe('POST /auth/register', () => {
+    it('should register a new user successfully', async () => {
       const mockTokens = {
-        accessToken: "mock.access.token",
-        refreshToken: "mock.refresh.token",
+        accessToken: 'mock.access.token',
+        refreshToken: 'mock.refresh.token',
       };
 
       vi.mocked(authService.register).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "testuser",
-          password: "password123",
+          username: 'testuser',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(201);
       expect(response.json()).toEqual(mockTokens);
       expect(authService.register).toHaveBeenCalledWith({
-        username: "testuser",
-        password: "password123",
+        username: 'testuser',
+        password: 'password123',
       });
     });
 
-    it("should return 400 when username is too short", async () => {
+    it('should return 400 when username is too short', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "ab",
-          password: "password123",
+          username: 'ab',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when username is too long", async () => {
+    it('should return 400 when username is too long', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "a".repeat(51),
-          password: "password123",
+          username: 'a'.repeat(51),
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when password is too short", async () => {
+    it('should return 400 when password is too short', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "testuser",
-          password: "short",
+          username: 'testuser',
+          password: 'short',
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when password is too long", async () => {
+    it('should return 400 when password is too long', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "testuser",
-          password: "a".repeat(101),
+          username: 'testuser',
+          password: 'a'.repeat(101),
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when username is missing", async () => {
+    it('should return 400 when username is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          password: "password123",
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when password is missing", async () => {
+    it('should return 400 when password is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "testuser",
+          username: 'testuser',
         },
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when username already exists", async () => {
-      vi.mocked(authService.register).mockRejectedValueOnce(
-        new Error("Username already exists"),
-      );
+    it('should return 400 when username already exists', async () => {
+      vi.mocked(authService.register).mockRejectedValueOnce(new Error('Username already exists'));
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "existinguser",
-          password: "password123",
+          username: 'existinguser',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(400);
       expect(response.json()).toEqual({
-        error: "Username already exists",
+        error: 'Username already exists',
       });
     });
 
-    it("should return 500 when an unexpected error occurs", async () => {
-      vi.mocked(authService.register).mockRejectedValueOnce("Unexpected error");
+    it('should return 500 when an unexpected error occurs', async () => {
+      vi.mocked(authService.register).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
-          username: "testuser",
-          password: "password123",
+          username: 'testuser',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(500);
       expect(response.json()).toEqual({
-        error: "Internal server error",
+        error: 'Internal server error',
       });
     });
   });
 
-  describe("POST /auth/login", () => {
-    it("should login successfully with correct credentials", async () => {
+  describe('POST /auth/login', () => {
+    it('should login successfully with correct credentials', async () => {
       const mockTokens = {
-        accessToken: "mock.access.token",
-        refreshToken: "mock.refresh.token",
+        accessToken: 'mock.access.token',
+        refreshToken: 'mock.refresh.token',
       };
 
       vi.mocked(authService.login).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          username: "testuser",
-          password: "password123",
+          username: 'testuser',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(mockTokens);
       expect(authService.login).toHaveBeenCalledWith({
-        username: "testuser",
-        password: "password123",
+        username: 'testuser',
+        password: 'password123',
       });
     });
 
-    it("should return 401 when credentials are invalid", async () => {
-      vi.mocked(authService.login).mockRejectedValueOnce(
-        new Error("Invalid credentials"),
-      );
+    it('should return 401 when credentials are invalid', async () => {
+      vi.mocked(authService.login).mockRejectedValueOnce(new Error('Invalid credentials'));
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          username: "testuser",
-          password: "wrongpassword",
+          username: 'testuser',
+          password: 'wrongpassword',
         },
       });
 
       expect(response.statusCode).toBe(401);
       expect(response.json()).toEqual({
-        error: "Invalid credentials",
+        error: 'Invalid credentials',
       });
     });
 
-    it("should return 400 when username is missing", async () => {
+    it('should return 400 when username is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          password: "password123",
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(401);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 400 when password is missing", async () => {
+    it('should return 400 when password is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          username: "testuser",
+          username: 'testuser',
         },
       });
 
       expect(response.statusCode).toBe(401);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 500 when an unexpected error occurs", async () => {
-      vi.mocked(authService.login).mockRejectedValueOnce("Unexpected error");
+    it('should return 500 when an unexpected error occurs', async () => {
+      vi.mocked(authService.login).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          username: "testuser",
-          password: "password123",
+          username: 'testuser',
+          password: 'password123',
         },
       });
 
       expect(response.statusCode).toBe(500);
       expect(response.json()).toEqual({
-        error: "Internal server error",
+        error: 'Internal server error',
       });
     });
   });
 
-  describe("POST /auth/refresh", () => {
-    it("should refresh tokens successfully with valid refresh token", async () => {
+  describe('POST /auth/refresh', () => {
+    it('should refresh tokens successfully with valid refresh token', async () => {
       const mockTokens = {
-        accessToken: "new.access.token",
-        refreshToken: "new.refresh.token",
+        accessToken: 'new.access.token',
+        refreshToken: 'new.refresh.token',
       };
 
       vi.mocked(authService.refresh).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(mockTokens);
-      expect(authService.refresh).toHaveBeenCalledWith("valid.refresh.token");
+      expect(authService.refresh).toHaveBeenCalledWith('valid.refresh.token');
     });
 
-    it("should return 401 when refresh token is invalid", async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce(
-        new Error("Invalid refresh token"),
-      );
+    it('should return 401 when refresh token is invalid', async () => {
+      vi.mocked(authService.refresh).mockRejectedValueOnce(new Error('Invalid refresh token'));
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {
-          refreshToken: "invalid.token",
+          refreshToken: 'invalid.token',
         },
       });
 
       expect(response.statusCode).toBe(401);
       expect(response.json()).toEqual({
-        error: "Invalid refresh token",
+        error: 'Invalid refresh token',
       });
     });
 
-    it("should return 401 when refresh token is expired", async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce(
-        new Error("Refresh token expired"),
-      );
+    it('should return 401 when refresh token is expired', async () => {
+      vi.mocked(authService.refresh).mockRejectedValueOnce(new Error('Refresh token expired'));
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {
-          refreshToken: "expired.token",
+          refreshToken: 'expired.token',
         },
       });
 
       expect(response.statusCode).toBe(401);
       expect(response.json()).toEqual({
-        error: "Refresh token expired",
+        error: 'Refresh token expired',
       });
     });
 
-    it("should return 401 when refresh token is missing", async () => {
+    it('should return 401 when refresh token is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {},
       });
 
       expect(response.statusCode).toBe(401);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 500 when an unexpected error occurs", async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce("Unexpected error");
+    it('should return 500 when an unexpected error occurs', async () => {
+      vi.mocked(authService.refresh).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
 
       expect(response.statusCode).toBe(500);
       expect(response.json()).toEqual({
-        error: "Internal server error",
+        error: 'Internal server error',
       });
     });
   });
 
-  describe("POST /auth/logout", () => {
-    it("should logout successfully", async () => {
+  describe('POST /auth/logout', () => {
+    it('should logout successfully', async () => {
       vi.mocked(authService.logout).mockResolvedValueOnce();
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/logout",
+        method: 'POST',
+        url: '/auth/logout',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
 
       expect(response.statusCode).toBe(204);
-      expect(response.body).toBe("");
-      expect(authService.logout).toHaveBeenCalledWith("valid.refresh.token");
+      expect(response.body).toBe('');
+      expect(authService.logout).toHaveBeenCalledWith('valid.refresh.token');
     });
 
-    it("should return 400 when refresh token is invalid", async () => {
-      vi.mocked(authService.logout).mockRejectedValueOnce(
-        new Error("Invalid token"),
-      );
+    it('should return 400 when refresh token is invalid', async () => {
+      vi.mocked(authService.logout).mockRejectedValueOnce(new Error('Invalid token'));
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/logout",
+        method: 'POST',
+        url: '/auth/logout',
         payload: {
-          refreshToken: "invalid.token",
+          refreshToken: 'invalid.token',
         },
       });
 
       expect(response.statusCode).toBe(400);
       expect(response.json()).toEqual({
-        error: "Invalid token",
+        error: 'Invalid token',
       });
     });
 
-    it("should return 400 when refresh token is missing", async () => {
+    it('should return 400 when refresh token is missing', async () => {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/logout",
+        method: 'POST',
+        url: '/auth/logout',
         payload: {},
       });
 
       expect(response.statusCode).toBe(400);
-      expect(response.json()).toHaveProperty("error");
+      expect(response.json()).toHaveProperty('error');
     });
 
-    it("should return 500 when an unexpected error occurs", async () => {
-      vi.mocked(authService.logout).mockRejectedValueOnce("Unexpected error");
+    it('should return 500 when an unexpected error occurs', async () => {
+      vi.mocked(authService.logout).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/logout",
+        method: 'POST',
+        url: '/auth/logout',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
 
       expect(response.statusCode).toBe(500);
       expect(response.json()).toEqual({
-        error: "Internal server error",
+        error: 'Internal server error',
       });
     });
   });
 });
 
-describe("Auth Routes - Rate Limiting", () => {
+describe('Auth Routes - Rate Limiting', () => {
   let server: FastifyInstance;
 
   beforeAll(async () => {
@@ -444,10 +426,10 @@ describe("Auth Routes - Rate Limiting", () => {
     await server.close();
   });
 
-  it("should enforce rate limiting on /auth/login after 5 requests", async () => {
+  it('should enforce rate limiting on /auth/login after 5 requests', async () => {
     const mockTokens = {
-      accessToken: "mock.access.token",
-      refreshToken: "mock.refresh.token",
+      accessToken: 'mock.access.token',
+      refreshToken: 'mock.refresh.token',
     };
 
     vi.mocked(authService.login).mockResolvedValue(mockTokens);
@@ -455,11 +437,11 @@ describe("Auth Routes - Rate Limiting", () => {
     // Make 5 successful requests
     for (let i = 0; i < 5; i++) {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/login",
+        method: 'POST',
+        url: '/auth/login',
         payload: {
-          username: "testuser",
-          password: "password123",
+          username: 'testuser',
+          password: 'password123',
         },
       });
       expect(response.statusCode).toBe(200);
@@ -467,21 +449,21 @@ describe("Auth Routes - Rate Limiting", () => {
 
     // 6th request should be rate limited
     const rateLimitedResponse = await server.inject({
-      method: "POST",
-      url: "/auth/login",
+      method: 'POST',
+      url: '/auth/login',
       payload: {
-        username: "testuser",
-        password: "password123",
+        username: 'testuser',
+        password: 'password123',
       },
     });
 
     expect(rateLimitedResponse.statusCode).toBe(429);
   });
 
-  it("should enforce rate limiting on /auth/register after 10 requests", async () => {
+  it('should enforce rate limiting on /auth/register after 10 requests', async () => {
     const mockTokens = {
-      accessToken: "mock.access.token",
-      refreshToken: "mock.refresh.token",
+      accessToken: 'mock.access.token',
+      refreshToken: 'mock.refresh.token',
     };
 
     vi.mocked(authService.register).mockResolvedValue(mockTokens);
@@ -489,11 +471,11 @@ describe("Auth Routes - Rate Limiting", () => {
     // Make 10 successful requests
     for (let i = 0; i < 10; i++) {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/register",
+        method: 'POST',
+        url: '/auth/register',
         payload: {
           username: `testuser${i}`,
-          password: "password123",
+          password: 'password123',
         },
       });
       expect(response.statusCode).toBe(201);
@@ -501,21 +483,21 @@ describe("Auth Routes - Rate Limiting", () => {
 
     // 11th request should be rate limited
     const rateLimitedResponse = await server.inject({
-      method: "POST",
-      url: "/auth/register",
+      method: 'POST',
+      url: '/auth/register',
       payload: {
-        username: "testuser11",
-        password: "password123",
+        username: 'testuser11',
+        password: 'password123',
       },
     });
 
     expect(rateLimitedResponse.statusCode).toBe(429);
   });
 
-  it("should enforce rate limiting on /auth/refresh after 20 requests", async () => {
+  it('should enforce rate limiting on /auth/refresh after 20 requests', async () => {
     const mockTokens = {
-      accessToken: "new.access.token",
-      refreshToken: "new.refresh.token",
+      accessToken: 'new.access.token',
+      refreshToken: 'new.refresh.token',
     };
 
     vi.mocked(authService.refresh).mockResolvedValue(mockTokens);
@@ -523,10 +505,10 @@ describe("Auth Routes - Rate Limiting", () => {
     // Make 20 successful requests
     for (let i = 0; i < 20; i++) {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/refresh",
+        method: 'POST',
+        url: '/auth/refresh',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
       expect(response.statusCode).toBe(200);
@@ -534,26 +516,26 @@ describe("Auth Routes - Rate Limiting", () => {
 
     // 21st request should be rate limited
     const rateLimitedResponse = await server.inject({
-      method: "POST",
-      url: "/auth/refresh",
+      method: 'POST',
+      url: '/auth/refresh',
       payload: {
-        refreshToken: "valid.refresh.token",
+        refreshToken: 'valid.refresh.token',
       },
     });
 
     expect(rateLimitedResponse.statusCode).toBe(429);
   });
 
-  it("should enforce rate limiting on /auth/logout after 10 requests", async () => {
+  it('should enforce rate limiting on /auth/logout after 10 requests', async () => {
     vi.mocked(authService.logout).mockResolvedValue();
 
     // Make 10 successful requests
     for (let i = 0; i < 10; i++) {
       const response = await server.inject({
-        method: "POST",
-        url: "/auth/logout",
+        method: 'POST',
+        url: '/auth/logout',
         payload: {
-          refreshToken: "valid.refresh.token",
+          refreshToken: 'valid.refresh.token',
         },
       });
       expect(response.statusCode).toBe(204);
@@ -561,10 +543,10 @@ describe("Auth Routes - Rate Limiting", () => {
 
     // 11th request should be rate limited
     const rateLimitedResponse = await server.inject({
-      method: "POST",
-      url: "/auth/logout",
+      method: 'POST',
+      url: '/auth/logout',
       payload: {
-        refreshToken: "valid.refresh.token",
+        refreshToken: 'valid.refresh.token',
       },
     });
 
