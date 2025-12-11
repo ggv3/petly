@@ -75,29 +75,44 @@ own-pet-details <--> home
 - Docker and Docker Compose
 - PostgreSQL (via Docker)
 
-### Database Setup
+### Environment Setup
 
-The project uses PostgreSQL with Drizzle ORM for schema management and migrations. The `database-schema` service handles all database schema definitions and migrations.
+The project requires environment configuration for database and services.
 
-#### 1. Create Environment Files
-
-Create environment files for database configuration:
+#### 1. Create Environment File
 
 **`.env.dev`**
 
 ```env
+# =============================================================================
+# GENERIC CONFIGURATION
+# =============================================================================
+
+# Database Configuration
 POSTGRES_DB=petly_dev
 POSTGRES_USER=petly_dev
 POSTGRES_PASSWORD=petly_dev
+DB_HOST=localhost
+DB_PORT=5432
+
+# JWT Configuration
+JWT_ACCESS_SECRET=your-access-secret-key-min-32-chars-change-in-production
+JWT_REFRESH_SECRET=your-refresh-secret-key-min-32-chars-change-in-production
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+# =============================================================================
+# SERVICE-SPECIFIC CONFIGURATION
+# =============================================================================
+
+# Auth Service
+PORT=3001
+HOST=0.0.0.0
 ```
 
-**`.env.prod`**
+### Database Setup
 
-```env
-POSTGRES_DB=petly_prod
-POSTGRES_USER=petly_prod
-POSTGRES_PASSWORD=your_secure_password
-```
+The project uses PostgreSQL with Drizzle ORM for schema management and migrations. The `database-schema` service handles all database schema definitions and migrations.
 
 #### 2. Start Database and Run Migrations
 
@@ -169,13 +184,139 @@ npm run dev
    npm run studio
    ```
 
+## Services
+
+### Auth Service
+
+The authentication service handles user registration, login, token refresh, and logout using JWT.
+
+#### Running the Auth Service
+
+```bash
+# Development mode (with auto-reload)
+cd auth-service
+npm run dev
+
+# Production mode
+npm run build
+npm start
+
+# Run tests
+npm test
+```
+
+#### API Endpoints
+
+**POST `/auth/register`**
+Register a new user account.
+
+```bash
+curl -X POST http://localhost:3001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "securepassword123"
+  }'
+```
+
+Response (201):
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**POST `/auth/login`**
+Login with existing credentials.
+
+```bash
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "securepassword123"
+  }'
+```
+
+Response (200):
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**POST `/auth/refresh`**
+Refresh access token using refresh token.
+
+```bash
+curl -X POST http://localhost:3001/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+  }'
+```
+
+Response (200):
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**POST `/auth/logout`**
+Logout and invalidate refresh token.
+
+```bash
+curl -X POST http://localhost:3001/auth/logout \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+  }'
+```
+
+Response (204): No content
+
+**GET `/health`**
+Health check endpoint.
+
+```bash
+curl http://localhost:3001/health
+```
+
+Response (200):
+```json
+{
+  "status": "ok"
+}
+```
+
+#### Authentication Flow
+
+1. **Register/Login**: User registers or logs in, receives `accessToken` and `refreshToken`
+2. **Authenticated Requests**: Include `accessToken` in Authorization header: `Bearer <token>`
+3. **Token Expiration**: Access tokens expire in 15 minutes (configurable)
+4. **Refresh**: Use `refreshToken` to get new access tokens without re-login
+5. **Logout**: Invalidate refresh token to prevent further token refreshing
+
+#### Validation Rules
+
+- **Username**: 3-50 characters
+- **Password**: 8-100 characters, hashed with bcrypt
+- **Tokens**: JWT with configurable expiration times
+
 ## Project Structure
 
 ```
 petly/
 ├── docker-compose.yaml         # Container orchestration
+├── .env                        # Service configuration (JWT, ports, etc.)
 ├── .env.dev                    # Development database config
 ├── .env.prod                   # Production database config
+├── .biome.json                 # Code linting and formatting config
+├── commitlint.config.js        # Commit message linting
 │
 ├── database-schema/            # Drizzle ORM schema & migrations
 │   ├── src/
@@ -184,28 +325,33 @@ petly/
 │   ├── drizzle.config.ts       # Drizzle configuration
 │   └── Dockerfile              # Migration service container
 │
-├── frontend/                   # React application
-├── api-gateway/                # API Gateway service
-├── auth-service/               # Authentication service
-├── user-service/               # User management service
-├── pet-service/                # Pet management service
-└── rental-service/             # Rental management service
+├── auth-service/               # Authentication service (JWT)
+│   ├── src/
+│   │   ├── config/             # Environment and database config
+│   │   ├── routes/             # API route handlers
+│   │   ├── services/           # Business logic
+│   │   └── utils/              # JWT and password utilities
+│   └── Dockerfile
+│
+├── frontend/                   # React application (TODO)
+├── api-gateway/                # API Gateway service (TODO)
+├── user-service/               # User management service (TODO)
+├── pet-service/                # Pet management service (TODO)
+└── rental-service/             # Rental management service (TODO)
 ```
 
-## User Stories
+## Code Quality & Development Tools
 
-- As a user I want to see the application
-- As a user I want to log in so that I can use the application
-- As a user I want to add a pet so that it can be rented
-- As a user I want to modify pet information so that it stays up to date
-- As a user I want to update my information so that it stays current
-- As a user I want to rent a pet so that I can enjoy their company
+### Biome
+The project uses Biome for linting and formatting:
 
-## Open Questions & TODOs
+```bash
+# Check code quality
+npm run ci
 
-- How to handle dependency updates across multiple package.json files (Dependabot? Automated PRs?)
-- Can shared dependencies be consolidated across services?
-- CI/CD pipeline setup and strategy
-- Production deployment and internet exposure strategy
-- Monitoring and logging strategy
-- API documentation (Swagger/OpenAPI?)
+# Format code
+npx biome format --write .
+
+# Lint code
+npx biome lint .
+```
