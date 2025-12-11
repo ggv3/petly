@@ -17,8 +17,8 @@
 		"auth-service"
 	],
 	"scripts": {
-		"test:watch": "npm run test --workspace=auth-service",
-		"test:run": "npm run test --workspace=auth-service -- --run",
+		"test": "npm run test --workspace=auth-service",
+		"test:ci": "npm run test --workspace=auth-service -- run",
 		"prepare": "husky",
 		"lint": "biome lint .",
 		"format": "biome format .",

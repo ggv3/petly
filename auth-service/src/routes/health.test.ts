@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { buildServer } from "./server.js";
+import { buildServer } from "../server.js";
 
-describe("Auth Service", () => {
+describe("Health Route", () => {
 	let server: FastifyInstance;
 
 	beforeAll(async () => {
