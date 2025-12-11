@@ -22,7 +22,7 @@
     "prepare": "husky",
     "lint": "biome lint .",
     "format": "biome format --indent-style=space .",
-    "ci": "biome ci .",
+    "ci": "biome ci --indent-style=space .",
     "dev": "docker-compose --env-file .env.dev up --build",
     "prod": "docker-compose --env-file .env.prod up -d",
     "generate": "cd database-schema && npm run generate",
