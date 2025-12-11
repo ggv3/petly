@@ -1,20 +1,20 @@
 {
-	"name": "@petly/database-schema",
-	"version": "0.0.1",
-	"type": "module",
-	"main": "./src/index.ts",
-	"scripts": {
-		"generate": "drizzle-kit generate",
-		"migrate": "drizzle-kit migrate",
-		"studio": "drizzle-kit studio"
-	},
-	"dependencies": {
-		"drizzle-orm": "^0.45.0",
-		"postgres": "^3.4.7"
-	},
-	"devDependencies": {
-		"@types/node": "^24.10.1",
-		"drizzle-kit": "^0.31.8",
-		"typescript": "^5.9.3"
-	}
+  "name": "@petly/database-schema",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.0",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.8",
+    "typescript": "^5.9.3"
+  }
 }
