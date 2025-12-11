@@ -427,3 +427,54 @@ describe("Auth Routes", () => {
 		});
 	});
 });
+
+describe("Auth Routes - Rate Limiting", () => {
+	let server: FastifyInstance;
+
+	beforeAll(async () => {
+		server = buildServer({ logger: false });
+		await server.ready();
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	afterAll(async () => {
+		await server.close();
+	});
+
+	it("should enforce rate limiting on /auth/login after 5 requests", async () => {
+		const mockTokens = {
+			accessToken: "mock.access.token",
+			refreshToken: "mock.refresh.token",
+		};
+
+		vi.mocked(authService.login).mockResolvedValue(mockTokens);
+
+		// Make 5 successful requests
+		for (let i = 0; i < 5; i++) {
+			const response = await server.inject({
+				method: "POST",
+				url: "/auth/login",
+				payload: {
+					username: "testuser",
+					password: "password123",
+				},
+			});
+			expect(response.statusCode).toBe(200);
+		}
+
+		// 6th request should be rate limited
+		const rateLimitedResponse = await server.inject({
+			method: "POST",
+			url: "/auth/login",
+			payload: {
+				username: "testuser",
+				password: "password123",
+			},
+		});
+
+		expect(rateLimitedResponse.statusCode).toBe(429);
+	});
+});

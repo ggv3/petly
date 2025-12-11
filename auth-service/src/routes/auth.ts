@@ -30,18 +30,29 @@ export const authRoutes = async (server: FastifyInstance) => {
 		}
 	});
 
-	server.post("/auth/login", async (request, reply) => {
-		try {
-			const body = loginSchema.parse(request.body);
-			const tokens = await authService.login(body);
-			return reply.send(tokens);
-		} catch (error) {
-			if (error instanceof Error) {
-				return reply.code(401).send({ error: error.message });
+	server.post(
+		"/auth/login",
+		{
+			config: {
+				rateLimit: {
+					max: 5, // Maximum 5 requests
+					timeWindow: "1 minute", // Per minute
+				},
+			},
+		},
+		async (request, reply) => {
+			try {
+				const body = loginSchema.parse(request.body);
+				const tokens = await authService.login(body);
+				return reply.send(tokens);
+			} catch (error) {
+				if (error instanceof Error) {
+					return reply.code(401).send({ error: error.message });
+				}
+				return reply.code(500).send({ error: "Internal server error" });
 			}
-			return reply.code(500).send({ error: "Internal server error" });
-		}
-	});
+		},
+	);
 
 	server.post("/auth/refresh", async (request, reply) => {
 		try {
