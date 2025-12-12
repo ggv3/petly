@@ -1,10 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { HTTP_STATUS, PASSWORD, RATE_LIMIT, USERNAME } from '../constants.js';
 import * as authService from '../services/auth-service.js';
 
 const registerSchema = z.object({
-  username: z.string().min(3).max(50),
-  password: z.string().min(8).max(100),
+  username: z.string().min(USERNAME.MIN_LENGTH).max(USERNAME.MAX_LENGTH),
+  password: z.string().min(PASSWORD.MIN_LENGTH).max(PASSWORD.MAX_LENGTH),
 });
 
 const loginSchema = z.object({
@@ -22,8 +23,8 @@ export const authRoutes = (server: FastifyInstance) => {
     {
       config: {
         rateLimit: {
-          max: 10, // Maximum 10 requests
-          timeWindow: '1 minute', // Per minute
+          max: RATE_LIMIT.REGISTER.MAX,
+          timeWindow: RATE_LIMIT.REGISTER.TIME_WINDOW,
         },
       },
     },
@@ -31,12 +32,14 @@ export const authRoutes = (server: FastifyInstance) => {
       try {
         const body = registerSchema.parse(request.body);
         const tokens = await authService.register(body);
-        return reply.code(201).send(tokens);
+        return reply.code(HTTP_STATUS.CREATED).send(tokens);
       } catch (error) {
         if (error instanceof Error) {
-          return reply.code(400).send({ error: error.message });
+          return reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: error.message });
         }
-        return reply.code(500).send({ error: 'Internal server error' });
+        return reply
+          .code(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Internal server error' });
       }
     },
   );
@@ -46,8 +49,8 @@ export const authRoutes = (server: FastifyInstance) => {
     {
       config: {
         rateLimit: {
-          max: 5, // Maximum 5 requests
-          timeWindow: '1 minute', // Per minute
+          max: RATE_LIMIT.LOGIN.MAX,
+          timeWindow: RATE_LIMIT.LOGIN.TIME_WINDOW,
         },
       },
     },
@@ -58,9 +61,11 @@ export const authRoutes = (server: FastifyInstance) => {
         return reply.send(tokens);
       } catch (error) {
         if (error instanceof Error) {
-          return reply.code(401).send({ error: error.message });
+          return reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: error.message });
         }
-        return reply.code(500).send({ error: 'Internal server error' });
+        return reply
+          .code(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Internal server error' });
       }
     },
   );
@@ -70,8 +75,8 @@ export const authRoutes = (server: FastifyInstance) => {
     {
       config: {
         rateLimit: {
-          max: 20, // Maximum 20 requests
-          timeWindow: '1 minute', // Per minute
+          max: RATE_LIMIT.REFRESH.MAX,
+          timeWindow: RATE_LIMIT.REFRESH.TIME_WINDOW,
         },
       },
     },
@@ -82,9 +87,11 @@ export const authRoutes = (server: FastifyInstance) => {
         return reply.send(tokens);
       } catch (error) {
         if (error instanceof Error) {
-          return reply.code(401).send({ error: error.message });
+          return reply.code(HTTP_STATUS.UNAUTHORIZED).send({ error: error.message });
         }
-        return reply.code(500).send({ error: 'Internal server error' });
+        return reply
+          .code(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Internal server error' });
       }
     },
   );
@@ -94,8 +101,8 @@ export const authRoutes = (server: FastifyInstance) => {
     {
       config: {
         rateLimit: {
-          max: 10, // Maximum 10 requests
-          timeWindow: '1 minute', // Per minute
+          max: RATE_LIMIT.LOGOUT.MAX,
+          timeWindow: RATE_LIMIT.LOGOUT.TIME_WINDOW,
         },
       },
     },
@@ -103,12 +110,14 @@ export const authRoutes = (server: FastifyInstance) => {
       try {
         const body = refreshSchema.parse(request.body);
         await authService.logout(body.refreshToken);
-        return reply.code(204).send();
+        return reply.code(HTTP_STATUS.NO_CONTENT).send();
       } catch (error) {
         if (error instanceof Error) {
-          return reply.code(400).send({ error: error.message });
+          return reply.code(HTTP_STATUS.BAD_REQUEST).send({ error: error.message });
         }
-        return reply.code(500).send({ error: 'Internal server error' });
+        return reply
+          .code(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Internal server error' });
       }
     },
   );
