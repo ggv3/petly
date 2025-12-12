@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { refreshToken, user } from '@petly/database-schema';
 import { eq } from 'drizzle-orm';
 import { db } from '../config/database.js';
+import { ERROR_MESSAGES, TOKEN } from '../constants.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { hashPassword, verifyPassword } from '../utils/password.js';
 
@@ -27,7 +28,7 @@ export const register = async (input: RegisterInput): Promise<AuthTokens> => {
   });
 
   if (existingUser) {
-    throw new Error('Username already exists');
+    throw new Error(ERROR_MESSAGES.USERNAME_EXISTS);
   }
 
   // Hash password and create user
@@ -51,13 +52,13 @@ export const login = async (input: LoginInput): Promise<AuthTokens> => {
   });
 
   if (!foundUser) {
-    throw new Error('Invalid credentials');
+    throw new Error(ERROR_MESSAGES.INVALID_CREDENTIALS);
   }
 
   // Verify password
   const isValid = await verifyPassword(input.password, foundUser.passwordHash);
   if (!isValid) {
-    throw new Error('Invalid credentials');
+    throw new Error(ERROR_MESSAGES.INVALID_CREDENTIALS);
   }
 
   // Generate tokens
@@ -74,12 +75,12 @@ export const refresh = async (token: string): Promise<AuthTokens> => {
   });
 
   if (!storedToken || storedToken.revokedAt !== null) {
-    throw new Error('Invalid refresh token');
+    throw new Error(ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
   }
 
   // Check if token is expired
   if (new Date() > storedToken.expiresAt) {
-    throw new Error('Refresh token expired');
+    throw new Error(ERROR_MESSAGES.REFRESH_TOKEN_EXPIRED);
   }
 
   // Get user
@@ -88,7 +89,7 @@ export const refresh = async (token: string): Promise<AuthTokens> => {
   });
 
   if (!foundUser) {
-    throw new Error('User not found');
+    throw new Error(ERROR_MESSAGES.USER_NOT_FOUND);
   }
 
   // Generate new tokens
@@ -111,9 +112,9 @@ const generateTokensForUser = async (userId: string, username: string): Promise<
   const accessToken = generateAccessToken({ userId, username });
 
   // Create refresh token in database
-  const tokenHash = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.randomBytes(TOKEN.RANDOM_BYTES_LENGTH).toString('hex');
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+  expiresAt.setDate(expiresAt.getDate() + TOKEN.REFRESH_EXPIRATION_DAYS);
 
   const [newRefreshToken] = await db
     .insert(refreshToken)
