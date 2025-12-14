@@ -26,6 +26,19 @@ updates:
       development-dependencies:
         dependency-type: "development"
 
+  # Auth service dependencies
+  - package-ecosystem: "npm"
+    directory: "/auth-service"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+
   
   # Enable updates for GitHub Actions
   - package-ecosystem: "github-actions"
