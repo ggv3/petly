@@ -315,7 +315,7 @@ petly/
 ├── .env                        # Service configuration (JWT, ports, etc.)
 ├── .env.dev                    # Development database config
 ├── .env.prod                   # Production database config
-├── .biome.json                 # Code linting and formatting config
+├── biome.json                 # Code linting and formatting config
 ├── commitlint.config.js        # Commit message linting
 │
 ├── database-schema/            # Drizzle ORM schema & migrations
