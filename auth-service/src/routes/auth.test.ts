@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildServer } from '../server.js';
-import * as authService from '../services/auth-service.js';
+import { login, logout, refresh, register } from '../services/auth-service.js';
 
 // Mock the auth service module
 vi.mock('../services/auth-service.js', () => ({
@@ -34,7 +34,7 @@ describe('Auth Routes', () => {
         refreshToken: 'mock.refresh.token',
       };
 
-      vi.mocked(authService.register).mockResolvedValueOnce(mockTokens);
+      vi.mocked(register).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
         method: 'POST',
@@ -47,7 +47,7 @@ describe('Auth Routes', () => {
 
       expect(response.statusCode).toBe(201);
       expect(response.json()).toEqual(mockTokens);
-      expect(authService.register).toHaveBeenCalledWith({
+      expect(register).toHaveBeenCalledWith({
         username: 'testuser',
         password: 'password123',
       });
@@ -136,7 +136,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 400 when username already exists', async () => {
-      vi.mocked(authService.register).mockRejectedValueOnce(new Error('Username already exists'));
+      vi.mocked(register).mockRejectedValueOnce(new Error('Username already exists'));
 
       const response = await server.inject({
         method: 'POST',
@@ -154,7 +154,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 500 when an unexpected error occurs', async () => {
-      vi.mocked(authService.register).mockRejectedValueOnce('Unexpected error');
+      vi.mocked(register).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
         method: 'POST',
@@ -179,7 +179,7 @@ describe('Auth Routes', () => {
         refreshToken: 'mock.refresh.token',
       };
 
-      vi.mocked(authService.login).mockResolvedValueOnce(mockTokens);
+      vi.mocked(login).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
         method: 'POST',
@@ -192,14 +192,14 @@ describe('Auth Routes', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(mockTokens);
-      expect(authService.login).toHaveBeenCalledWith({
+      expect(login).toHaveBeenCalledWith({
         username: 'testuser',
         password: 'password123',
       });
     });
 
     it('should return 401 when credentials are invalid', async () => {
-      vi.mocked(authService.login).mockRejectedValueOnce(new Error('Invalid credentials'));
+      vi.mocked(login).mockRejectedValueOnce(new Error('Invalid credentials'));
 
       const response = await server.inject({
         method: 'POST',
@@ -243,7 +243,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 500 when an unexpected error occurs', async () => {
-      vi.mocked(authService.login).mockRejectedValueOnce('Unexpected error');
+      vi.mocked(login).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
         method: 'POST',
@@ -268,7 +268,7 @@ describe('Auth Routes', () => {
         refreshToken: 'new.refresh.token',
       };
 
-      vi.mocked(authService.refresh).mockResolvedValueOnce(mockTokens);
+      vi.mocked(refresh).mockResolvedValueOnce(mockTokens);
 
       const response = await server.inject({
         method: 'POST',
@@ -280,11 +280,11 @@ describe('Auth Routes', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(mockTokens);
-      expect(authService.refresh).toHaveBeenCalledWith('valid.refresh.token');
+      expect(refresh).toHaveBeenCalledWith('valid.refresh.token');
     });
 
     it('should return 401 when refresh token is invalid', async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce(new Error('Invalid refresh token'));
+      vi.mocked(refresh).mockRejectedValueOnce(new Error('Invalid refresh token'));
 
       const response = await server.inject({
         method: 'POST',
@@ -301,7 +301,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 401 when refresh token is expired', async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce(new Error('Refresh token expired'));
+      vi.mocked(refresh).mockRejectedValueOnce(new Error('Refresh token expired'));
 
       const response = await server.inject({
         method: 'POST',
@@ -329,7 +329,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 500 when an unexpected error occurs', async () => {
-      vi.mocked(authService.refresh).mockRejectedValueOnce('Unexpected error');
+      vi.mocked(refresh).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
         method: 'POST',
@@ -348,7 +348,7 @@ describe('Auth Routes', () => {
 
   describe('POST /auth/logout', () => {
     it('should logout successfully', async () => {
-      vi.mocked(authService.logout).mockResolvedValueOnce();
+      vi.mocked(logout).mockResolvedValueOnce();
 
       const response = await server.inject({
         method: 'POST',
@@ -360,11 +360,11 @@ describe('Auth Routes', () => {
 
       expect(response.statusCode).toBe(204);
       expect(response.body).toBe('');
-      expect(authService.logout).toHaveBeenCalledWith('valid.refresh.token');
+      expect(logout).toHaveBeenCalledWith('valid.refresh.token');
     });
 
     it('should return 400 when refresh token is invalid', async () => {
-      vi.mocked(authService.logout).mockRejectedValueOnce(new Error('Invalid token'));
+      vi.mocked(logout).mockRejectedValueOnce(new Error('Invalid token'));
 
       const response = await server.inject({
         method: 'POST',
@@ -392,7 +392,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 500 when an unexpected error occurs', async () => {
-      vi.mocked(authService.logout).mockRejectedValueOnce('Unexpected error');
+      vi.mocked(logout).mockRejectedValueOnce('Unexpected error');
 
       const response = await server.inject({
         method: 'POST',
@@ -432,7 +432,7 @@ describe('Auth Routes - Rate Limiting', () => {
       refreshToken: 'mock.refresh.token',
     };
 
-    vi.mocked(authService.login).mockResolvedValue(mockTokens);
+    vi.mocked(login).mockResolvedValue(mockTokens);
 
     // Make 5 successful requests
     for (let i = 0; i < 5; i++) {
@@ -466,7 +466,7 @@ describe('Auth Routes - Rate Limiting', () => {
       refreshToken: 'mock.refresh.token',
     };
 
-    vi.mocked(authService.register).mockResolvedValue(mockTokens);
+    vi.mocked(register).mockResolvedValue(mockTokens);
 
     // Make 10 successful requests
     for (let i = 0; i < 10; i++) {
@@ -500,7 +500,7 @@ describe('Auth Routes - Rate Limiting', () => {
       refreshToken: 'new.refresh.token',
     };
 
-    vi.mocked(authService.refresh).mockResolvedValue(mockTokens);
+    vi.mocked(refresh).mockResolvedValue(mockTokens);
 
     // Make 20 successful requests
     for (let i = 0; i < 20; i++) {
@@ -527,7 +527,7 @@ describe('Auth Routes - Rate Limiting', () => {
   });
 
   it('should enforce rate limiting on /auth/logout after 10 requests', async () => {
-    vi.mocked(authService.logout).mockResolvedValue();
+    vi.mocked(logout).mockResolvedValue();
 
     // Make 10 successful requests
     for (let i = 0; i < 10; i++) {
