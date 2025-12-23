@@ -22,12 +22,13 @@
     "prepare": "husky",
     "lint": "biome lint .",
     "format": "biome format .",
-    "ci": "biome ci .",
+    "ci": "biome ci . && npm run typecheck",
     "dev": "docker-compose --env-file .env.dev up --build",
     "prod": "docker-compose --env-file .env.prod up -d",
     "generate": "cd database-schema && npm run generate",
     "migrate": "cd database-schema && npm run migrate",
-    "studio": "cd database-schema && npm run studio"
+    "studio": "cd database-schema && npm run studio",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "type": "module",
   "devDependencies": {
