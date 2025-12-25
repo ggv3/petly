@@ -1,8 +1,8 @@
 import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
-import { authRoutes } from './routes/auth.js';
-import { healthRoutes } from './routes/health.js';
+import { authRoutes } from './routes/auth-route.js';
+import { healthRoutes } from './routes/health-route.js';
 
 export const buildServer = (options?: { logger?: boolean }): FastifyInstance => {
   const server: FastifyInstance = Fastify({
