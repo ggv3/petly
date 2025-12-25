@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      
+      - name: Create Release
+        uses: juancarlosjr97/release-it-containerized@0.8.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          plugins_list: '@release-it/conventional-changelog@latest'
