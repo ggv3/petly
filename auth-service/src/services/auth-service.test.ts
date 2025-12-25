@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import * as database from '../config/database.js';
-import * as authService from './auth-service.js';
+import { db } from '../config/database.js';
+import { login, logout, refresh, register } from './auth-service.js';
 
 // Mock the database module
 vi.mock('../config/database.js', () => ({
@@ -51,23 +51,23 @@ describe('Auth Service', () => {
       };
 
       // Mock user doesn't exist
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(undefined);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(undefined);
 
       // Mock user creation
       const insertMock = vi.fn().mockResolvedValueOnce([mockUser]);
       const valuesMock = vi.fn().mockReturnValueOnce({ returning: insertMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesMock,
       } as never);
 
       // Mock refresh token creation
       const insertTokenMock = vi.fn().mockResolvedValueOnce([mockRefreshToken]);
       const valuesTokenMock = vi.fn().mockReturnValueOnce({ returning: insertTokenMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesTokenMock,
       } as never);
 
-      const result = await authService.register({
+      const result = await register({
         username: 'testuser',
         password: 'password123',
       });
@@ -87,10 +87,10 @@ describe('Auth Service', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(existingUser);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(existingUser);
 
       await expect(
-        authService.register({
+        register({
           username: 'existinguser',
           password: 'password123',
         }),
@@ -115,21 +115,21 @@ describe('Auth Service', () => {
         revokedAt: null,
       };
 
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(undefined);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(undefined);
 
       const insertMock = vi.fn().mockResolvedValueOnce([mockUser]);
       const valuesMock = vi.fn().mockReturnValueOnce({ returning: insertMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesMock,
       } as never);
 
       const insertTokenMock = vi.fn().mockResolvedValueOnce([mockRefreshToken]);
       const valuesTokenMock = vi.fn().mockReturnValueOnce({ returning: insertTokenMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesTokenMock,
       } as never);
 
-      await authService.register({
+      await register({
         username: 'testuser',
         password: 'plainpassword',
       });
@@ -166,15 +166,15 @@ describe('Auth Service', () => {
         revokedAt: null,
       };
 
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(mockUser);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(mockUser);
 
       const insertTokenMock = vi.fn().mockResolvedValueOnce([mockRefreshToken]);
       const valuesTokenMock = vi.fn().mockReturnValueOnce({ returning: insertTokenMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesTokenMock,
       } as never);
 
-      const result = await authService.login({
+      const result = await login({
         username: 'testuser',
         password: 'password123',
       });
@@ -186,10 +186,10 @@ describe('Auth Service', () => {
     });
 
     it('should throw error when user does not exist', async () => {
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(undefined);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(undefined);
 
       await expect(
-        authService.login({
+        login({
           username: 'nonexistent',
           password: 'password123',
         }),
@@ -208,10 +208,10 @@ describe('Auth Service', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(mockUser);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(mockUser);
 
       await expect(
-        authService.login({
+        login({
           username: 'testuser',
           password: 'wrongpassword',
         }),
@@ -257,16 +257,16 @@ describe('Auth Service', () => {
         tokenId: mockTokenId,
       });
 
-      vi.mocked(database.db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(mockUser);
+      vi.mocked(db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(mockUser);
 
       const insertTokenMock = vi.fn().mockResolvedValueOnce([mockNewRefreshToken]);
       const valuesTokenMock = vi.fn().mockReturnValueOnce({ returning: insertTokenMock });
-      vi.mocked(database.db.insert).mockReturnValueOnce({
+      vi.mocked(db.insert).mockReturnValueOnce({
         values: valuesTokenMock,
       } as never);
 
-      const result = await authService.refresh(validRefreshToken);
+      const result = await refresh(validRefreshToken);
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
@@ -277,7 +277,7 @@ describe('Auth Service', () => {
     it('should throw error when refresh token is invalid', async () => {
       const invalidToken = 'invalid.token.here';
 
-      await expect(authService.refresh(invalidToken)).rejects.toThrow();
+      await expect(refresh(invalidToken)).rejects.toThrow();
     });
 
     it('should throw error when refresh token is revoked', async () => {
@@ -299,9 +299,9 @@ describe('Auth Service', () => {
         tokenId: mockTokenId,
       });
 
-      vi.mocked(database.db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
+      vi.mocked(db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
 
-      await expect(authService.refresh(validRefreshToken)).rejects.toThrow('Invalid refresh token');
+      await expect(refresh(validRefreshToken)).rejects.toThrow('Invalid refresh token');
     });
 
     it('should throw error when refresh token is expired', async () => {
@@ -323,9 +323,9 @@ describe('Auth Service', () => {
         tokenId: mockTokenId,
       });
 
-      vi.mocked(database.db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
+      vi.mocked(db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
 
-      await expect(authService.refresh(validRefreshToken)).rejects.toThrow('Refresh token expired');
+      await expect(refresh(validRefreshToken)).rejects.toThrow('Refresh token expired');
     });
 
     it('should throw error when user not found', async () => {
@@ -347,10 +347,10 @@ describe('Auth Service', () => {
         tokenId: mockTokenId,
       });
 
-      vi.mocked(database.db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
-      vi.mocked(database.db.query.user.findFirst).mockResolvedValueOnce(undefined);
+      vi.mocked(db.query.refreshToken.findFirst).mockResolvedValueOnce(mockStoredToken);
+      vi.mocked(db.query.user.findFirst).mockResolvedValueOnce(undefined);
 
-      await expect(authService.refresh(validRefreshToken)).rejects.toThrow('User not found');
+      await expect(refresh(validRefreshToken)).rejects.toThrow('User not found');
     });
   });
 
@@ -367,13 +367,13 @@ describe('Auth Service', () => {
 
       const whereMock = vi.fn().mockResolvedValueOnce(undefined);
       const setMock = vi.fn().mockReturnValueOnce({ where: whereMock });
-      vi.mocked(database.db.update).mockReturnValueOnce({
+      vi.mocked(db.update).mockReturnValueOnce({
         set: setMock,
       } as never);
 
-      await authService.logout(validRefreshToken);
+      await logout(validRefreshToken);
 
-      expect(database.db.update).toHaveBeenCalled();
+      expect(db.update).toHaveBeenCalled();
       expect(setMock).toHaveBeenCalledWith(
         expect.objectContaining({
           revokedAt: expect.any(Date),
@@ -384,7 +384,7 @@ describe('Auth Service', () => {
     it('should throw error when refresh token is invalid', async () => {
       const invalidToken = 'invalid.token.here';
 
-      await expect(authService.logout(invalidToken)).rejects.toThrow();
+      await expect(logout(invalidToken)).rejects.toThrow();
     });
   });
 });

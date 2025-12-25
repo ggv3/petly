@@ -1,16 +1,7 @@
 import type { SignOptions } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
-
-export interface AccessTokenPayload {
-  userId: string;
-  username: string;
-}
-
-export interface RefreshTokenPayload {
-  userId: string;
-  tokenId: string;
-}
+import type { AccessTokenPayload, RefreshTokenPayload } from '../types.js';
 
 export const generateAccessToken = (payload: AccessTokenPayload): string => {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {

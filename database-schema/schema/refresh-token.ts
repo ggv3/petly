@@ -1,5 +1,5 @@
 import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { user } from './user.js';
+import { user } from './user.ts';
 
 export const refreshToken = pgTable('refresh_token', {
   id: uuid('id').primaryKey().defaultRandom(),

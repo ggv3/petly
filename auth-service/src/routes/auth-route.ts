@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { HTTP_STATUS, PASSWORD, RATE_LIMIT, USERNAME } from '../constants.js';
-import * as authService from '../services/auth-service.js';
+import { login, logout, refresh, register } from '../services/auth-service.js';
 
 const registerSchema = z.object({
   username: z.string().min(USERNAME.MIN_LENGTH).max(USERNAME.MAX_LENGTH),
@@ -31,7 +31,7 @@ export const authRoutes = (server: FastifyInstance) => {
     async (request, reply) => {
       try {
         const body = registerSchema.parse(request.body);
-        const tokens = await authService.register(body);
+        const tokens = await register(body);
         return reply.code(HTTP_STATUS.CREATED).send(tokens);
       } catch (error) {
         if (error instanceof Error) {
@@ -57,7 +57,7 @@ export const authRoutes = (server: FastifyInstance) => {
     async (request, reply) => {
       try {
         const body = loginSchema.parse(request.body);
-        const tokens = await authService.login(body);
+        const tokens = await login(body);
         return reply.send(tokens);
       } catch (error) {
         if (error instanceof Error) {
@@ -83,7 +83,7 @@ export const authRoutes = (server: FastifyInstance) => {
     async (request, reply) => {
       try {
         const body = refreshSchema.parse(request.body);
-        const tokens = await authService.refresh(body.refreshToken);
+        const tokens = await refresh(body.refreshToken);
         return reply.send(tokens);
       } catch (error) {
         if (error instanceof Error) {
@@ -109,7 +109,7 @@ export const authRoutes = (server: FastifyInstance) => {
     async (request, reply) => {
       try {
         const body = refreshSchema.parse(request.body);
-        await authService.logout(body.refreshToken);
+        await logout(body.refreshToken);
         return reply.code(HTTP_STATUS.NO_CONTENT).send();
       } catch (error) {
         if (error instanceof Error) {
