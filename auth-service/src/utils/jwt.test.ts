@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import type { AccessTokenPayload, RefreshTokenPayload } from '../types.js';
 import {
-  type AccessTokenPayload,
   generateAccessToken,
   generateRefreshToken,
-  type RefreshTokenPayload,
   verifyAccessToken,
   verifyRefreshToken,
 } from './jwt.js';

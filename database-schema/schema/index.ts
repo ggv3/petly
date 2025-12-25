@@ -1,2 +1,2 @@
-export * from './refresh-token.js';
-export * from './user.js';
+export * from './refresh-token.ts';
+export * from './user.ts';
