@@ -14,11 +14,17 @@
   "author": "ggv3",
   "workspaces": [
     "database-schema",
-    "auth-service"
+    "auth-service",
+    "user-service",
+    "pet-service",
+    "rental-service"
   ],
   "scripts": {
-    "test": "npm run test --workspace=auth-service",
-    "test:ci": "npm run test --workspace=auth-service -- run",
+    "test": "npm run test --workspaces --if-present -- run",
+    "test:auth": "npm run test --workspace=auth-service",
+    "test:user": "npm run test --workspace=user-service",
+    "test:pet": "npm run test --workspace=pet-service",
+    "test:rental": "npm run test --workspace=rental-service",
     "prepare": "husky",
     "lint": "biome lint .",
     "format": "biome format .",

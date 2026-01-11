@@ -186,24 +186,31 @@ npm run dev
 
 ## Services
 
-### Auth Service
+All services include health check endpoints and are configured with Fastify, TypeScript, Vitest, and Drizzle ORM.
 
-The authentication service handles user registration, login, token refresh, and logout using JWT.
-
-#### Running the Auth Service
+### Running Services
 
 ```bash
-# Development mode (with auto-reload)
-cd auth-service
+# Run all services with Docker
 npm run dev
 
-# Production mode
-npm run build
-npm start
+# Run individual service in development mode
+cd <service-name>
+npm run dev
 
-# Run tests
+# Run tests for all services
 npm test
+
+# Run tests for individual service
+npm run test:auth    # Auth service
+npm run test:user    # User service
+npm run test:pet     # Pet service
+npm run test:rental  # Rental service
 ```
+
+### Auth Service (Port 3001)
+
+The authentication service handles user registration, login, token refresh, and logout using JWT.
 
 #### API Endpoints
 
@@ -289,7 +296,8 @@ curl http://localhost:3001/health
 Response (200):
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "service": "auth-service"
 }
 ```
 
@@ -306,6 +314,63 @@ Response (200):
 - **Username**: 3-50 characters
 - **Password**: 8-100 characters, hashed with bcrypt
 - **Tokens**: JWT with configurable expiration times
+
+### User Service (Port 3002)
+
+The user service handles user profile management and user-related operations.
+
+**GET `/health`**
+Health check endpoint.
+
+```bash
+curl http://localhost:3002/health
+```
+
+Response (200):
+```json
+{
+  "status": "ok",
+  "service": "user-service"
+}
+```
+
+### Pet Service (Port 3003)
+
+The pet service handles pet listings, pet details, and pet management operations.
+
+**GET `/health`**
+Health check endpoint.
+
+```bash
+curl http://localhost:3003/health
+```
+
+Response (200):
+```json
+{
+  "status": "ok",
+  "service": "pet-service"
+}
+```
+
+### Rental Service (Port 3004)
+
+The rental service handles pet rental transactions, bookings, and rental history.
+
+**GET `/health`**
+Health check endpoint.
+
+```bash
+curl http://localhost:3004/health
+```
+
+Response (200):
+```json
+{
+  "status": "ok",
+  "service": "rental-service"
+}
+```
 
 ## Project Structure
 
@@ -325,7 +390,7 @@ petly/
 │   ├── drizzle.config.ts       # Drizzle configuration
 │   └── Dockerfile              # Migration service container
 │
-├── auth-service/               # Authentication service (JWT)
+├── auth-service/               # Authentication service (JWT) - Port 3001
 │   ├── src/
 │   │   ├── config/             # Environment and database config
 │   │   ├── routes/             # API route handlers
@@ -333,11 +398,26 @@ petly/
 │   │   └── utils/              # JWT and password utilities
 │   └── Dockerfile
 │
+├── user-service/               # User management service - Port 3002
+│   ├── src/
+│   │   ├── config/             # Environment and database config
+│   │   └── routes/             # API route handlers
+│   └── Dockerfile
+│
+├── pet-service/                # Pet management service - Port 3003
+│   ├── src/
+│   │   ├── config/             # Environment and database config
+│   │   └── routes/             # API route handlers
+│   └── Dockerfile
+│
+├── rental-service/             # Rental management service - Port 3004
+│   ├── src/
+│   │   ├── config/             # Environment and database config
+│   │   └── routes/             # API route handlers
+│   └── Dockerfile
+│
 ├── frontend/                   # React application (TODO)
-├── api-gateway/                # API Gateway service (TODO)
-├── user-service/               # User management service (TODO)
-├── pet-service/                # Pet management service (TODO)
-└── rental-service/             # Rental management service (TODO)
+└── api-gateway/                # API Gateway service (TODO)
 ```
 
 ## Code Quality & Development Tools
