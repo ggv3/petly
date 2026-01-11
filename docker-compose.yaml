@@ -134,5 +134,30 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+      # CORS_ORIGIN: https://petly.ggv3.dev  # Set in production
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PET_SERVICE_URL: http://pet-service:3003
+      RENTAL_SERVICE_URL: http://rental-service:3004
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api-gateway/src:/app/api-gateway/src
+    depends_on:
+      - auth-service
+      - user-service
+      - pet-service
+      - rental-service
+    restart: unless-stopped
+
 volumes:
   postgres_data:

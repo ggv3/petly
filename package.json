@@ -14,6 +14,7 @@
   "author": "ggv3",
   "workspaces": [
     "database-schema",
+    "api-gateway",
     "auth-service",
     "user-service",
     "pet-service",
@@ -21,6 +22,7 @@
   ],
   "scripts": {
     "test": "npm run test --workspaces --if-present -- run",
+    "test:gateway": "npm run test --workspace=api-gateway",
     "test:auth": "npm run test --workspace=auth-service",
     "test:user": "npm run test --workspace=user-service",
     "test:pet": "npm run test --workspace=pet-service",
