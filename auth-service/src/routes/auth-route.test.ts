@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
+import { buildServer } from 'server.js';
+import { login, logout, refresh, register } from 'services/auth-service.js';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildServer } from '../server.js';
-import { login, logout, refresh, register } from '../services/auth-service.js';
 
 // Mock the auth service module
 vi.mock('../services/auth-service.js', () => ({

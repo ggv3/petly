@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
+import { buildServer } from 'server.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildServer } from '../server.js';
 
 describe('Health Route', () => {
   let server: FastifyInstance;

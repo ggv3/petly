@@ -1,5 +1,5 @@
+import type { AccessTokenPayload, RefreshTokenPayload } from 'types.js';
 import { describe, expect, it } from 'vitest';
-import type { AccessTokenPayload, RefreshTokenPayload } from '../types.js';
 import {
   generateAccessToken,
   generateRefreshToken,
