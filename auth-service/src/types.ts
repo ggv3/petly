@@ -18,7 +18,7 @@ export interface LoginInput {
   password: string;
 }
 
-export interface AuthToken {
+export interface Tokens {
   accessToken: string;
   refreshToken: string;
 }
