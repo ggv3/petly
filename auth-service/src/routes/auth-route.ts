@@ -1,7 +1,7 @@
+import { HTTP_STATUS, PASSWORD, RATE_LIMIT, USERNAME } from 'constants.js';
 import type { FastifyInstance } from 'fastify';
+import { login, logout, refresh, register } from 'services/auth-service.js';
 import { z } from 'zod';
-import { HTTP_STATUS, PASSWORD, RATE_LIMIT, USERNAME } from '../constants.js';
-import { login, logout, refresh, register } from '../services/auth-service.js';
 
 const registerSchema = z.object({
   username: z.string().min(USERNAME.MIN_LENGTH).max(USERNAME.MAX_LENGTH),

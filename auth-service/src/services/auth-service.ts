@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
 import { refreshToken, user } from '@petly/database-schema';
+import { db } from 'config/database.js';
+import { ERROR_MESSAGES, TOKEN } from 'constants.js';
 import { eq } from 'drizzle-orm';
-import { db } from '../config/database.js';
-import { ERROR_MESSAGES, TOKEN } from '../constants.js';
-import type { LoginInput, RegisterInput, Tokens } from '../types.js';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
-import { hashPassword, verifyPassword } from '../utils/password.js';
+import type { LoginInput, RegisterInput, Tokens } from 'types.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from 'utils/jwt.js';
+import { hashPassword, verifyPassword } from 'utils/password.js';
 
 export const register = async (input: RegisterInput): Promise<Tokens> => {
   // Check if user already exists

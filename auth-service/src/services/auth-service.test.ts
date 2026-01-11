@@ -1,5 +1,5 @@
+import { db } from 'config/database.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { db } from '../config/database.js';
 import { login, logout, refresh, register } from './auth-service.js';
 
 // Mock the database module
