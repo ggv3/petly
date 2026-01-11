@@ -6,12 +6,12 @@ A web app for renting pets built with a microservices architecture.
 
 The application uses a microservices architecture with the following services:
 
-- **Frontend**: React, TypeScript, Vite, Vitest, MUI, Tailwind, React Query
-- **API Gateway**: TypeScript, Fastify, Vitest
-- **Auth Service**: TypeScript, Fastify, JWT, Drizzle ORM
-- **User Service**: TypeScript, Fastify, Drizzle ORM
-- **Pet Service**: TypeScript, Fastify, Drizzle ORM
-- **Rental Service**: TypeScript, Fastify, Drizzle ORM
+- **Frontend**: React, TypeScript, Vite, Vitest, MUI, Tailwind, React Query (TODO)
+- **API Gateway**: TypeScript, Fastify, Vitest, HTTP Proxy - Port 3000
+- **Auth Service**: TypeScript, Fastify, JWT, Drizzle ORM - Port 3001
+- **User Service**: TypeScript, Fastify, Drizzle ORM - Port 3002
+- **Pet Service**: TypeScript, Fastify, Drizzle ORM - Port 3003
+- **Rental Service**: TypeScript, Fastify, Drizzle ORM - Port 3004
 - **Database**: PostgreSQL with Drizzle schema
 
 ### Service Architecture
@@ -186,7 +186,7 @@ npm run dev
 
 ## Services
 
-All services include health check endpoints and are configured with Fastify, TypeScript, Vitest, and Drizzle ORM.
+All services include health check endpoints and are configured with Fastify, TypeScript, and Vitest.
 
 ### Running Services
 
@@ -202,15 +202,94 @@ npm run dev
 npm test
 
 # Run tests for individual service
+npm run test:gateway # API Gateway
 npm run test:auth    # Auth service
 npm run test:user    # User service
 npm run test:pet     # Pet service
 npm run test:rental  # Rental service
 ```
 
+### API Gateway (Port 3000)
+
+The API Gateway is the single entry point for all client requests. It routes requests to the appropriate microservices using the `/api` prefix pattern.
+
+#### Features
+- **CORS Support**: Environment-based CORS configuration for secure cross-origin requests
+- **Proxy Routing**: Routes requests to microservices with URL rewriting
+- **Rate Limiting**: Configurable rate limiting support
+- **Service Discovery**: Configurable service URLs via environment variables
+- **Health Monitoring**: Central health check endpoint
+
+#### Environment Configuration
+
+The API Gateway requires the following environment variables:
+
+- `NODE_ENV`: Environment mode (`development` | `production`)
+- `PORT`: Gateway port (default: `3000`)
+- `HOST`: Bind address (default: `0.0.0.0`)
+- `CORS_ORIGIN`: **Required in production**. Allowed origin for CORS (e.g., `https://petly.ggv3.dev`)
+- `AUTH_SERVICE_URL`: Auth service URL
+- `USER_SERVICE_URL`: User service URL
+- `PET_SERVICE_URL`: Pet service URL
+- `RENTAL_SERVICE_URL`: Rental service URL
+
+**CORS Configuration:**
+- **Development**: Allows `http://localhost:5173` and `http://127.0.0.1:5173`
+- **Production**: Allows only the `CORS_ORIGIN` environment variable (required)
+- **Credentials**: Enabled for authentication support
+- **Methods**: `GET`, `POST` (expandable as needed)
+
+#### API Routes
+
+All microservice endpoints are accessible through the API Gateway with the `/api` prefix:
+
+- **Auth Service**: `/api/auth/*` → proxies to `http://auth-service:3001/auth/*`
+- **User Service**: `/api/user/*` → proxies to `http://user-service:3002/user/*`
+- **Pet Service**: `/api/pet/*` → proxies to `http://pet-service:3003/pet/*`
+- **Rental Service**: `/api/rental/*` → proxies to `http://rental-service:3004/rental/*`
+
+**GET `/health`**
+Health check endpoint for the API Gateway.
+
+```bash
+curl http://localhost:3000/health
+```
+
+Response (200):
+```json
+{
+  "status": "ok",
+  "service": "api-gateway"
+}
+```
+
+#### Example Usage
+
+Instead of calling services directly, use the API Gateway:
+
+```bash
+# Register a new user through API Gateway
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "securepassword123"
+  }'
+
+# Login through API Gateway
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "securepassword123"
+  }'
+```
+
 ### Auth Service (Port 3001)
 
 The authentication service handles user registration, login, token refresh, and logout using JWT.
+
+> **Note**: In production, all requests should go through the API Gateway at `http://localhost:3000/api/auth/*`. The examples below show direct service access for development/testing purposes.
 
 #### API Endpoints
 
@@ -390,6 +469,14 @@ petly/
 │   ├── drizzle.config.ts       # Drizzle configuration
 │   └── Dockerfile              # Migration service container
 │
+├── api-gateway/                # API Gateway service - Port 3000
+│   ├── src/
+│   │   ├── config/             # Environment configuration
+│   │   ├── routes/             # Health check routes
+│   │   ├── server.ts           # Fastify server with proxy setup
+│   │   └── index.ts            # Entry point
+│   └── Dockerfile
+│
 ├── auth-service/               # Authentication service (JWT) - Port 3001
 │   ├── src/
 │   │   ├── config/             # Environment and database config
@@ -416,8 +503,7 @@ petly/
 │   │   └── routes/             # API route handlers
 │   └── Dockerfile
 │
-├── frontend/                   # React application (TODO)
-└── api-gateway/                # API Gateway service (TODO)
+└── frontend/                   # React application (TODO)
 ```
 
 ## Code Quality & Development Tools
