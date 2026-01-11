@@ -16,8 +16,8 @@
     "drizzle-orm": "^0.45.1",
     "fastify": "^5.6.2",
     "jsonwebtoken": "^9.0.3",
-    "postgres": "^3.4.7",
-    "zod": "^4.2.1"
+    "postgres": "^3.4.8",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
