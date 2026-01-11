@@ -3,11 +3,11 @@ import { refreshToken, user } from '@petly/database-schema';
 import { eq } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { ERROR_MESSAGES, TOKEN } from '../constants.js';
-import type { AuthToken, LoginInput, RegisterInput } from '../types.js';
+import type { LoginInput, RegisterInput, Tokens } from '../types.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { hashPassword, verifyPassword } from '../utils/password.js';
 
-export const register = async (input: RegisterInput): Promise<AuthToken> => {
+export const register = async (input: RegisterInput): Promise<Tokens> => {
   // Check if user already exists
   const existingUser = await db.query.user.findFirst({
     where: eq(user.username, input.username),
@@ -31,7 +31,7 @@ export const register = async (input: RegisterInput): Promise<AuthToken> => {
   return generateTokensForUser(newUser.id, newUser.username);
 };
 
-export const login = async (input: LoginInput): Promise<AuthToken> => {
+export const login = async (input: LoginInput): Promise<Tokens> => {
   // Find user
   const foundUser = await db.query.user.findFirst({
     where: eq(user.username, input.username),
@@ -51,7 +51,7 @@ export const login = async (input: LoginInput): Promise<AuthToken> => {
   return generateTokensForUser(foundUser.id, foundUser.username);
 };
 
-export const refresh = async (token: string): Promise<AuthToken> => {
+export const refresh = async (token: string): Promise<Tokens> => {
   // Verify refresh token
   const payload = verifyRefreshToken(token);
 
@@ -93,7 +93,7 @@ export const logout = async (token: string): Promise<void> => {
     .where(eq(refreshToken.id, payload.tokenId));
 };
 
-const generateTokensForUser = async (userId: string, username: string): Promise<AuthToken> => {
+const generateTokensForUser = async (userId: string, username: string): Promise<Tokens> => {
   // Generate access token
   const accessToken = generateAccessToken({ userId, username });
 
